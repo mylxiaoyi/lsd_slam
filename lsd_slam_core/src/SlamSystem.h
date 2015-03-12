@@ -117,6 +117,7 @@ public:
 	float nAvgTrackFrame, nAvgOptimizationIteration, nAvgFindConstraintsItaration, nAvgFindReferences;
 	struct timeval lastHzUpdate;
 
+    DepthMap* map;
 
 private:
 
@@ -128,7 +129,7 @@ private:
 
 
 	// ============= EXCLUSIVELY MAPPING THREAD (+ init) =============
-	DepthMap* map;
+    //DepthMap* map;
 	TrackingReference* mappingTrackingReference;
 
 	// during re-localization used

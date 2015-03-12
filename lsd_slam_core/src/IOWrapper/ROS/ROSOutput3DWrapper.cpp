@@ -34,11 +34,13 @@
 #include "geometry_msgs/PoseStamped.h"
 #include "GlobalMapping/g2oTypeSim3Sophus.h"
 
+#include "DepthEstimation/DepthMap.h"
+
 namespace lsd_slam
 {
 
 
-ROSOutput3DWrapper::ROSOutput3DWrapper(int width, int height)
+ROSOutput3DWrapper::ROSOutput3DWrapper(int width, int height) : it_(nh_)
 {
 	this->width = width;
 	this->height = height;
@@ -58,6 +60,11 @@ ROSOutput3DWrapper::ROSOutput3DWrapper(int width, int height)
 	pose_channel = nh_.resolveName("lsd_slam/pose");
 	pose_publisher = nh_.advertise<geometry_msgs::PoseStamped>(pose_channel,1);
 
+    depthMap_channel = nh_.resolveName("lsd_slam/depth_map");
+    depthMap_publisher = it_.advertise(depthMap_channel, 1);
+
+    depthMap_frame = boost::make_shared<cv_bridge::CvImage>();
+    depthMap_frame->encoding = sensor_msgs::image_encodings::BGR8;
 
 	publishLvl=0;
 }
@@ -209,6 +216,21 @@ void ROSOutput3DWrapper::publishDebugInfo(Eigen::Matrix<float, 20, 1> data)
 		msg.data.push_back((float)(data[i]));
 
 	debugInfo_publisher.publish(msg);
+}
+
+void ROSOutput3DWrapper::publishDepthMap(DepthMap *map)
+{
+    ROS_INFO_STREAM("publish depth map");
+
+    cv::Mat img = map->debugImageDepth;
+
+    if (img.empty())
+        return ;
+
+    depthMap_frame->image = img;
+    depthMap_frame->header.stamp = ros::Time::now();
+
+    depthMap_publisher.publish(depthMap_frame->toImageMsg());
 }
 
 }

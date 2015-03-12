@@ -22,6 +22,9 @@
 
 #include <ros/ros.h>
 #include "IOWrapper/Output3DWrapper.h"
+#include <image_transport/image_transport.h>
+#include <cv_bridge/cv_bridge.h>
+#include <sensor_msgs/image_encodings.h>
 
 
 namespace lsd_slam
@@ -30,6 +33,7 @@ namespace lsd_slam
 
 class Frame;
 class KeyFrameGraph;
+class DepthMap;
 
 struct InputPointDense
 {
@@ -77,6 +81,9 @@ public:
 
 	virtual void publishDebugInfo(Eigen::Matrix<float, 20, 1> data);
 
+    // add by mylxiaoyi to publish depthmap from lsdslam
+    virtual void publishDepthMap(DepthMap *map);
+
 
 	int publishLvl;
 	
@@ -99,6 +106,12 @@ private:
 	std::string pose_channel;
 	ros::Publisher pose_publisher;
 
+    std::string depthMap_channel;
+    image_transport::Publisher depthMap_publisher;
+
 	ros::NodeHandle nh_;
+
+    image_transport::ImageTransport it_;
+    cv_bridge::CvImagePtr depthMap_frame;
 };
 }

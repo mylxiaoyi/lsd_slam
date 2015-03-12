@@ -34,6 +34,7 @@ class Frame;
 
 class KeyFrameGraph;
 class Frame;
+class DepthMap;
 
 
 
@@ -62,6 +63,9 @@ public:
 	virtual void publishTrajectoryIncrement(Eigen::Matrix<float, 3, 1> pt, std::string identifier) {};
 
 	virtual void publishDebugInfo(Eigen::Matrix<float, 20, 1> data) {};
+
+    // add by mylxiaoyi to publish depthmap from lsdslam
+    virtual void publishDepthMap(DepthMap *map){};
 
 };
 }

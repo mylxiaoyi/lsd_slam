@@ -80,8 +80,9 @@ void displayThreadLoop()
 }
 void makeDisplayThread()
 {
-	imageThreadKeepRunning = true;
-	imageDisplayThread = new boost::thread(&displayThreadLoop);
+    // edit by mylxiaoyi
+    //imageThreadKeepRunning = true;
+    //imageDisplayThread = new boost::thread(&displayThreadLoop);
 }
 void displayImage(const char* windowName, const cv::Mat& image, bool autoSize)
 {
@@ -111,7 +112,7 @@ void displayImage(const char* windowName, const cv::Mat& image, bool autoSize)
 		}
 		cv::imshow(windowName, image);
 	}
-	//cv::waitKey(1);
+    cv::waitKey(1);
 }
 
 int waitKey(int milliseconds)

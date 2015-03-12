@@ -654,8 +654,6 @@ void SlamSystem::addTimingSamples()
 
 void SlamSystem::debugDisplayDepthMap()
 {
-
-
 	map->debugPlotDepthMap();
 	double scale = 1;
 	if(currentKeyFrame != 0 && currentKeyFrame != 0)
@@ -685,7 +683,7 @@ void SlamSystem::debugDisplayDepthMap()
 	if(onSceenInfoDisplay)
 		printMessageOnCVImage(map->debugImageDepth, buf1, buf2);
 	if (displayDepthMap)
-		Util::displayImage( "DebugWindow DEPTH", map->debugImageDepth, false );
+        Util::displayImage( "DebugWindow DEPTH", map->debugImageDepth, false );
 
 	int pressedKey = Util::waitKey(1);
 	handleKey(pressedKey);
@@ -879,8 +877,10 @@ void SlamSystem::randomInit(uchar* image, double timeStamp, int id)
 	if(continuousPCOutput && outputWrapper != 0) outputWrapper->publishKeyframe(currentKeyFrame.get());
 
 
-	if (displayDepthMap || depthMapScreenshotFlag)
-		debugDisplayDepthMap();
+    // edit by mylxiaoyi
+    if (outputWrapper != 0) outputWrapper->publishKeyframe(currentKeyFrame.get());
+//	if (displayDepthMap || depthMapScreenshotFlag)
+//		debugDisplayDepthMap();
 
 
 	printf("Done Random initialization!\n");
@@ -1032,7 +1032,7 @@ void SlamSystem::trackFrame(uchar* image, unsigned int frameID, bool blockUntilM
 		boost::unique_lock<boost::mutex> lock(newFrameMappedMutex);
 		while(unmappedTrackedFrames.size() > 0)
 		{
-			//printf("TRACKING IS BLOCKING, waiting for %d frames to finish mapping.\n", (int)unmappedTrackedFrames.size());
+            printf("TRACKING IS BLOCKING, waiting for %d frames to finish mapping.\n", (int)unmappedTrackedFrames.size());
 			newFrameMappedSignal.wait(lock);
 		}
 		lock.unlock();

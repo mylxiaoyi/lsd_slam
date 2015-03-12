@@ -23,7 +23,14 @@ set(QT_USE_QTOPENGL TRUE)
 set(QT_USE_QTXML TRUE)
 find_package(QGLViewer REQUIRED)
 find_package(Eigen3 REQUIRED)
-include_directories(${QT_INCLUDES} ${EIGEN3_INCLUDE_DIR} ${QGLVIEWER_INCLUDE_DIR})
+include_directories(
+ 	"/usr/include/x86_64-linux-gnu/qt5"
+	"/usr/include/x86_64-linux-gnu/qt5/QtOpenGL"
+	"/usr/include/x86_64-linux-gnu/qt5/QtWidgets"
+	"/usr/include/x86_64-linux-gnu/qt5/QtGui"
+	"/usr/include/x86_64-linux-gnu/qt5/QtCore"
+	"/usr/include/x86_64-linux-gnu/qt5/QtXml"	
+	${EIGEN3_INCLUDE_DIR} ${QGLVIEWER_INCLUDE_DIR})
 
 rosbuild_find_ros_package(dynamic_reconfigure)
 include(${dynamic_reconfigure_PACKAGE_PATH}/cmake/cfgbuild.cmake)
@@ -40,7 +47,7 @@ rosbuild_genmsg()
 # SSE flags
 rosbuild_check_for_sse()
 set(CMAKE_CXX_FLAGS
-   "${SSE_FLAGS}"
+   "${SSE_FLAGS} -fPIC"
 )
 
 # SSE Sources files
@@ -64,7 +71,7 @@ include_directories(
 
 rosbuild_add_executable(viewer src/main_viewer.cpp ${SOURCE_FILES} ${HEADER_FILES})
 
-target_link_libraries(viewer ${QGLViewer_LIBRARIES} ${QT_LIBRARIES} ${QGLVIEWER_LIBRARY} GL glut GLU)
+target_link_libraries(viewer Qt5Core Qt5Gui Qt5Widgets Qt5OpenGL Qt5Xml QGLViewer GL glut GLU)
 
 rosbuild_link_boost(viewer thread)
 

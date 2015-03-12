@@ -30,3 +30,5 @@ cmake_install.cmake
 *.cfgc
 
 
+lsd_slam_viewer/src/*.pro*
+lsd_slam_core/src/*.pro*

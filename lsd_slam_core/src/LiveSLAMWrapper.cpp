@@ -136,6 +136,9 @@ void LiveSLAMWrapper::newImageCallback(const cv::Mat& img, Timestamp imgTime)
 	{
 		monoOdometry->trackFrame(grayImg.data,imageSeqNumber,false,imgTime.toSec());
 	}
+
+    // add by mylxiaoyi
+    outputWrapper->publishDepthMap(monoOdometry->map);
 }
 
 void LiveSLAMWrapper::logCameraPose(const SE3& camToWorld, double time)

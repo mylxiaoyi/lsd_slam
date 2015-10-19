@@ -1,6 +1,5 @@
 cmake_minimum_required(VERSION 2.4.6)
 project(lsd_slam_viewer)
-include($ENV{ROS_ROOT}/core/rosbuild/rosbuild.cmake)
 
 # Set the build type.  Options are:
 #  Coverage       : w/ debug symbols, w/o optimization, w/ code-coverage
@@ -8,47 +7,46 @@ include($ENV{ROS_ROOT}/core/rosbuild/rosbuild.cmake)
 #  Release        : w/o debug symbols, w/ optimization
 #  RelWithDebInfo : w/ debug symbols, w/ optimization
 #  MinSizeRel     : w/o debug symbols, w/ optimization, stripped binaries
-set(ROS_BUILD_TYPE Release)
-
-rosbuild_init()
+find_package(catkin REQUIRED roscpp cv_bridge sensor_msgs std_msgs 
+	message_generation dynamic_reconfigure roslib)
 
 ADD_SUBDIRECTORY(${PROJECT_SOURCE_DIR}/thirdparty/Sophus)
 
-set(EXECUTABLE_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/bin)
-set(LIBRARY_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/lib)
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${PROJECT_SOURCE_DIR}/cmake)
 
-find_package(OpenGL REQUIRED)
+find_package(OpenCV REQUIRED)
+find_package(Qt5 REQUIRED COMPONENTS OpenGL Xml)
 set(QT_USE_QTOPENGL TRUE)
 set(QT_USE_QTXML TRUE)
 find_package(QGLViewer REQUIRED)
 find_package(Eigen3 REQUIRED)
 include_directories(
- 	"/usr/include/x86_64-linux-gnu/qt5"
-	"/usr/include/x86_64-linux-gnu/qt5/QtOpenGL"
-	"/usr/include/x86_64-linux-gnu/qt5/QtWidgets"
-	"/usr/include/x86_64-linux-gnu/qt5/QtGui"
-	"/usr/include/x86_64-linux-gnu/qt5/QtCore"
-	"/usr/include/x86_64-linux-gnu/qt5/QtXml"	
+	${Qt5OpenGL_INCLUDE_DIRS}
+	${Qt5Xml_INCLUDE_DIRS}
+	${OpenCV_INCLUDE_DIRS}
 	${EIGEN3_INCLUDE_DIR} ${QGLVIEWER_INCLUDE_DIR})
 
-rosbuild_find_ros_package(dynamic_reconfigure)
-include(${dynamic_reconfigure_PACKAGE_PATH}/cmake/cfgbuild.cmake)
-gencfg()
 
-
-
-
-
-# Messages & Services
-rosbuild_genmsg()
-
-
-# SSE flags
-rosbuild_check_for_sse()
 set(CMAKE_CXX_FLAGS
    "${SSE_FLAGS} -fPIC"
 )
+
+generate_dynamic_reconfigure_options(
+	cfg/LSDSLAMViewerParams.cfg
+)
+
+add_message_files(
+	FILES
+	keyframeGraphMsg.msg
+	keyframeMsg.msg
+)
+
+generate_messages(
+	DEPENDENCIES
+	std_msgs
+)
+
+catkin_package(CATKIN_DEPENDS message_runtime std_msgs)
 
 # SSE Sources files
 set(SOURCE_FILES         
@@ -69,12 +67,10 @@ include_directories(
   ${PROJECT_SOURCE_DIR}/thirdparty/Sophus
 )  
 
-rosbuild_add_executable(viewer src/main_viewer.cpp ${SOURCE_FILES} ${HEADER_FILES})
+add_executable(viewer src/main_viewer.cpp ${SOURCE_FILES} ${HEADER_FILES})
 
-target_link_libraries(viewer Qt5Core Qt5Gui Qt5Widgets Qt5OpenGL Qt5Xml QGLViewer GL glut GLU)
+target_link_libraries(viewer ${catkin_LIBRARIES} Qt5::OpenGL Qt5::Xml ${OpenCV_LIBS} -lQGLViewer -lGL -lpthread)
 
-rosbuild_link_boost(viewer thread)
+add_executable(videoStitch src/main_stitchVideos.cpp)
 
-
-rosbuild_add_executable(videoStitch src/main_stitchVideos.cpp)
-
+target_link_libraries(videoStitch ${OpenCV_LIBS})

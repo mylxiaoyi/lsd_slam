@@ -48,6 +48,17 @@
 
 using namespace lsd_slam;
 
+// add by mylxiaoyi to print Sim3
+void printSim3(Sim3 sim3) {
+    std::cout << "Sim3(" << sim3.N << "x" << sim3.N << ")" << std::endl;
+    for (int i=0; i<4; i++) {
+        for (int j=0; j<4; j++) {
+            std::cout << (sim3.matrix())(i,j) << "\t";
+        }
+        std::cout << std::endl;
+    }
+}
+
 
 SlamSystem::SlamSystem(int w, int h, Eigen::Matrix3f K, bool enableSLAM)
 : SLAMEnabled(enableSLAM), relocalizer(w,h,K)
@@ -920,8 +931,18 @@ void SlamSystem::trackFrame(uchar* image, unsigned int frameID, bool blockUntilM
 
 
 	poseConsistencyMutex.lock_shared();
+    std::cout << "before frameToReference_initialEstimate" << std::endl;
+    Sim3 referencePose = trackingReferencePose->getCamToWorld();
+    std::cout << "referencePose" << std::endl;
+    printSim3(referencePose);
+    std::cout << "referencePose inverse" << std::endl;
+    printSim3(referencePose.inverse());
+    Sim3 keyFramePose = keyFrameGraph->allFramePoses.back()->getCamToWorld();
+    std::cout << "keyFramePose" << std::endl;
+    printSim3(keyFramePose);
 	SE3 frameToReference_initialEstimate = se3FromSim3(
-			trackingReferencePose->getCamToWorld().inverse() * keyFrameGraph->allFramePoses.back()->getCamToWorld());
+                referencePose.inverse() * keyFramePose);
+            //trackingReferencePose->getCamToWorld().inverse() * keyFrameGraph->allFramePoses.back()->getCamToWorld());
 	poseConsistencyMutex.unlock_shared();
 
 
